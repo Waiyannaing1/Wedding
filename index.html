@@ -145,24 +145,8 @@ dialog{width:min(94vw,650px);max-height:94vh;padding:0;border:0;background:trans
         <span class="eyebrow">Kindly respond</span>
         <h2 class="script">Will you celebrate with us?</h2>
         <p>Please reply by December 15, 2026</p>
-        <form id="rsvpForm">
-          <label>Your name<input name="name" type="text" autocomplete="name" required placeholder="Full name" /></label>
-          <label>Will you attend?
-            <select name="attendance" required>
-              <option value="">Choose one</option>
-              <option value="yes">Joyfully accepts</option>
-              <option value="no">Regretfully declines</option>
-            </select>
-          </label>
-          <label>Number of guests<input name="guests" type="number" min="1" max="10" value="1" required /></label>
-          <label>A note for the couple<textarea name="message" rows="3" placeholder="Share your duas and wishes..."></textarea></label>
-          <button class="button" type="submit">Send RSVP</button>
-        </form>
-        <div class="rsvp-success" id="rsvpSuccess" role="status" hidden>
-          <span>♡</span>
-          <h3>Thank you, dear guest!</h3>
-          <p>Your response has been saved with love.</p>
-        </div>
+        <p>Your invitation details and guest options will open securely on Joy.</p>
+        <a class="button" href="https://withjoy.com/fayaz-and-aarifa/rsvp?v=1" target="_blank" rel="noopener noreferrer">RSVP on Joy</a>
       </div>
     </section>
 
@@ -184,34 +168,22 @@ const openButton = document.getElementById('openInvitation');
 const tapHint = document.getElementById('tapHint');
 const site = document.getElementById('weddingSite');
 const musicToggle = document.getElementById('musicToggle');
-let audioContext;
-let musicTimer;
+const weddingSong = new Audio('kun-faya-kun-clip.mp3');
+weddingSong.loop = true;
+weddingSong.preload = 'auto';
+weddingSong.volume = 0.72;
 let musicOn = false;
 
 function playRomanticMusic(){
-  if(!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  audioContext.resume();
   musicOn = true;
   musicToggle.setAttribute('aria-pressed','true');
-  const notes=[261.63,329.63,392,493.88,440,392,329.63,293.66,349.23,440,523.25,493.88,392,349.23,329.63,261.63];
-  let step=0;
-  const play=()=>{
-    if(!musicOn) return;
-    const now=audioContext.currentTime;
-    const osc=audioContext.createOscillator();
-    const gain=audioContext.createGain();
-    const filter=audioContext.createBiquadFilter();
-    osc.type='sine'; osc.frequency.value=notes[step%notes.length];
-    filter.type='lowpass'; filter.frequency.value=1200;
-    gain.gain.setValueAtTime(.0001,now); gain.gain.exponentialRampToValueAtTime(.055,now+.08); gain.gain.exponentialRampToValueAtTime(.0001,now+1.1);
-    osc.connect(filter).connect(gain).connect(audioContext.destination); osc.start(now); osc.stop(now+1.15);
-    if(step%2===0){const harmony=audioContext.createOscillator(),g=audioContext.createGain();harmony.type='sine';harmony.frequency.value=notes[step%notes.length]/2;g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(.018,now+.1);g.gain.exponentialRampToValueAtTime(.0001,now+1.5);harmony.connect(g).connect(audioContext.destination);harmony.start(now);harmony.stop(now+1.55)}
-    step++;
-  };
-  play(); musicTimer=setInterval(play,680);
+  weddingSong.play().catch(() => {
+    musicOn = false;
+    musicToggle.setAttribute('aria-pressed','false');
+  });
 }
 
-function stopMusic(){ musicOn=false; clearInterval(musicTimer); musicToggle.setAttribute('aria-pressed','false'); }
+function stopMusic(){ musicOn=false; weddingSong.pause(); musicToggle.setAttribute('aria-pressed','false'); }
 function toggleMusic(){ if(musicOn) stopMusic(); else playRomanticMusic(); }
 
 function makePetal(burst=false){
@@ -255,15 +227,6 @@ const invitationDialog=document.getElementById('invitationDialog');
 document.getElementById('viewInvitation').addEventListener('click',()=>invitationDialog.showModal());
 document.getElementById('closeInvitation').addEventListener('click',()=>invitationDialog.close());
 invitationDialog.addEventListener('click',e=>{if(e.target===invitationDialog)invitationDialog.close()});
-
-const form=document.getElementById('rsvpForm');
-form.addEventListener('submit',e=>{
-  e.preventDefault();
-  const response=Object.fromEntries(new FormData(form)); response.submittedAt=new Date().toISOString();
-  const responses=JSON.parse(localStorage.getItem('fayazAarifaRSVPs')||'[]'); responses.push(response);
-  localStorage.setItem('fayazAarifaRSVPs',JSON.stringify(responses)); form.hidden=true;
-  document.getElementById('rsvpSuccess').hidden=false; for(let i=0;i<16;i++)makePetal(true);
-});
 
 document.querySelector('[data-copy-invitation]').src = document.getElementById('embeddedInvitation').src;
 </script>
